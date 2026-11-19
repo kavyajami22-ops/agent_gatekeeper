@@ -9,18 +9,15 @@
 
 ## 1. Overview & Methodology
 
-This document logs the actual interaction, iterative prompt sequence, and human oversight applied during the design, development, and documentation of the **IndiGo Agent Gatekeeper** assignment. 
+This document logs the actual interaction, iterative prompt sequence, and human oversight applied during the design, development, testing, and documentation of the **IndiGo Agent Gatekeeper** assignment. 
 
-The AI coding assistant was utilized as a technical co-pilot to translate business governance requirements into clean software architecture, database schemas, and documentation. All high-level business rules, domain constraints, academic identifiers, threshold boundaries, and testing validations were driven and verified by the student.
+The AI coding assistant was utilized as a technical co-pilot to translate business governance requirements into clean software architecture, database schemas, and documentation. All high-level business rules, domain constraints, academic identifiers, threshold boundaries, and testing validations were driven, reviewed, and verified by the student.
 
 ---
 
 ## 2. Chronological Log of Actual Prompts Used
 
 ### Stage 1: Initial System Architecture & Implementation Planning
-* **Objective:** Establish the foundational problem statement, business domain (IndiGo Airlines), the 4 supported actions, tri-state decision model, and request an architectural plan without writing premature code.
-* **Actual Prompt Used:**
-
 ```text
 I am building an MBA assignment called
 Agent Gatekeeper for IndiGo Airlines.
@@ -56,9 +53,6 @@ Wait for my approval.
 ---
 
 ### Stage 2: Architecture Refinement & Specific Governance Rules
-* **Objective:** Enforce specific MBA assignment parameters, prominent display of enrolment number `PGD202564221`, the ₹8,000 threshold, strict human confirmation for changes/refunds, permanent revocation rules, and the educational simulation guarantee.
-* **Actual Prompt Used:**
-
 ```text
 Your proposed architecture looks good.
 
@@ -95,31 +89,19 @@ for my approval before coding.
 
 ---
 
-### Stage 3: Approval and Implementation Execution
-* **Objective:** Authorize implementation of the revised plan and adapt to the local runtime environment.
-* **Actual Prompts & Instructions Used:**
-
-```text
-[Approval of Revised Implementation Plan via Interface]
-```
-
+### Stage 3: Implementation Execution & Environment Boundary
+* **User Approval & Proceed Prompt:**
 ```text
 proceed again
 ```
-
-* **User Environment Boundary Instruction:**  
-When the system prompted for external permission to run package installations, I provided the specific local constraint:
+* **User Environment Constraint (Intervention during package installation):**
 ```text
 i have only python with me installed
 ```
-* **Impact of this Human Input:** Because I specified that only base Python was installed, the assistant adapted the solution to include a **zero-dependency pure Python web server** (`server.py`) and a one-click Windows launcher (`run.bat`), ensuring the application ran out-of-the-box without requiring complex pip installations or administrative privileges.
 
 ---
 
 ### Stage 4: Written Academic Documentation (REPORT.md & RULES.md)
-* **Objective:** Generate formal written documentation for grading based strictly on the implemented code, database schema, and empirical test results.
-* **Actual Prompt Used:**
-
 ```text
 Now prepare the written documentation for my MBA Agent Gatekeeper assignment.
 
@@ -146,9 +128,6 @@ Use the actual implemented project functionality and test results. Do not invent
 ---
 
 ### Stage 5: PDF Conversion (REPORT.pdf)
-* **Objective:** Convert the 2-page report into a submission-ready PDF while safeguarding system environment cleanliness.
-* **Actual Prompt Used:**
-
 ```text
 Please convert my existing REPORT.md into a professionally formatted PDF named REPORT.pdf.
 
@@ -165,10 +144,7 @@ If PDF conversion requires an additional library, explain what is needed before 
 
 ---
 
-### Stage 6: Prompt Traceability Documentation (PROMPTS.md)
-* **Objective:** Capture this complete interaction log for academic submission and document manual verification.
-* **Actual Prompt Used:**
-
+### Stage 6: Prompt Traceability Creation (PROMPTS.md)
 ```text
 Create a file named PROMPTS.md inside my agent_gatekeeper project folder.
 
@@ -193,31 +169,79 @@ Keep the document clear, honest and suitable for academic submission. Do not mod
 
 ---
 
-## 3. Manual Review and Human Intervention
+### Stage 7: Git Repository Inspection
+```text
+Check whether Git is initialized in my existing agent_gatekeeper project folder.
 
-A core requirement of ethical AI usage in graduate business education is **active human verification** rather than passive acceptance of generated outputs. Throughout this assignment, I exercised independent judgment and manual oversight:
+Do not make any changes yet. Tell me:
+1. Whether Git is installed.
+2. Whether this folder is already a Git repository.
+3. Whether a GitHub remote repository is connected.
+4. How many commits currently exist.
+
+Do not create commits or push anything yet.
+```
+
+---
+
+### Stage 8: Demonstration Walkthrough Enhancement (README.md)
+```text
+Review the existing README.md and improve it by adding a clear section titled "How to Run the Project and Demonstrate the Six Test Cases".
+
+Include simple Windows instructions for launching the application using run.bat, explain the four main tabs, and list the six required test scenarios with their expected ALLOW, ASK CUSTOMER, or BLOCK outcomes.
+
+Do not change application logic or existing test results. Save only the updated README.md.
+```
+
+---
+
+### Stage 9: Master Governance Decision Table Enhancement (RULES.md)
+```text
+Review the existing RULES.md file. Improve its presentation by adding a clear decision table covering these six test scenarios:
+
+1. Registered active agent viewing flight fares — ALLOW.
+2. Unknown or unregistered agent — BLOCK.
+3. Booking amount above ₹8,000 — ASK CUSTOMER.
+4. Booking amount at or below ₹8,000, with valid permission — ALLOW.
+5. Revoked agent making any request — BLOCK.
+6. Any flight change or refund request — ASK CUSTOMER.
+
+Also explain that revocation overrides all other permissions and that customer approval is required before a pending action is treated as approved.
+
+Keep the rules consistent with the actual application logic. Do not modify application code. Save only RULES.md.
+```
+
+---
+
+## 3. Manual Review and Changes
+
+A core principle of academic integrity in co-piloted software development is **active human verification** and **deliberate manual correction** rather than blind acceptance of AI outputs.
 
 ### 1. Genuine Manual Test: Verification of the ₹9,500 Threshold Boundary
-* **The Test Scenario:** In **Tab 1: Live Agent Simulator**, I selected an active commercial agent (*Personal Gemini Travel Agent - AGT-GEM-003*) and selected the action **"Book a flight"**.
-* **Test Input:** I configured the itinerary to **Mumbai (BOM) $\rightarrow$ Goa (GOI) on Flight 6E-802** with a transaction value of **₹9,500**, which specifically exceeds the pre-approved ₹8,000 baseline.
-* **Observed Output & Verification:**
-  * I personally confirmed that the Gatekeeper did **not** automatically approve the financial transaction.
-  * The Gatekeeper correctly rendered the amber **`VERDICT: ASK CUSTOMER`** decision card, explicitly citing that ₹9,500 exceeds the pre-approved ₹8,000 limit.
-  * I navigated to **Tab 2: Customer Confirmation Inbox** and verified that the request had been placed in the pending holding queue.
-  * I clicked **`Approve Action`**, observed the simulated status update to `APPROVED`, and checked **Tab 4: Audit Log** to confirm that an immutable log entry with timestamp was permanently created.
+* **The Manual Check:** In **Tab 1: Live Agent Simulator**, I personally configured a simulated booking using an active commercial agent (*Personal Gemini Travel Agent - AGT-GEM-003*) for **Mumbai (BOM) $\rightarrow$ Goa (GOI) on Flight 6E-802** with a transaction value of **₹9,500**, which specifically exceeds the pre-approved ₹8,000 limit.
+* **The Review & Verification:**
+  * I personally verified that the Gatekeeper did **not** automatically execute the transaction.
+  * The system correctly produced the amber **`VERDICT: ASK CUSTOMER`** decision card, explicitly citing the threshold violation.
+  * I navigated to **Tab 2: Customer Confirmation Inbox**, confirmed the request was held in `PENDING_CUSTOMER` status, manually clicked **`Approve Action`**, and confirmed the simulated state updated to `APPROVED` in the SQLite audit log.
 
-### 2. Environmental & Security Interventions
-* **Sandboxed Tool Verification:** When the assistant initiated automated shell installations, I intervened and specified: *"i have only python with me installed"*. This prevented unnecessary package installations and prompted the development of a zero-dependency architecture that runs entirely on standard library Python.
-* **Document Length Control:** When requesting the project report, I strictly bound the output to a **maximum of 2 A4 pages** and verified that the resulting `REPORT.pdf` adhered exactly to two pages without text overflow.
+### 2. Manual Corrections and Architectural Changes Enforced by the Student
+Throughout the project lifecycle, I reviewed the AI assistant's proposals and actively intervened to correct and change direction:
+* **Threshold & Policy Correction (Stage 2):** When the AI assistant initially proposed an arbitrary ₹5,000 threshold and flexible cancellation rules, I intervened before any code was written and mandated:
+  1. Setting the pre-approved baseline to **₹8,000**.
+  2. Mandating that **every** flight change and refund request strictly require human confirmation.
+  3. Requiring prominent, configurable display of my candidate enrolment number **`PGD202564221`**.
+  4. Enforcing an educational simulation boundary to ensure no real transactions could ever be triggered.
+* **Environment Architecture Correction (Stage 3):** When the AI assistant attempted to execute package installations outside the standard environment, I intervened and specified: *"i have only python with me installed"*. This manual correction altered the technical direction, resulting in a zero-dependency architecture with `server.py` and `run.bat` that runs on base Python standard library without external dependencies.
+* **Format & Scope Constraints (Stages 4 & 5):** I manually imposed strict length boundaries (maximum 2 pages for the project report and 1 page for the rules sheet), and prohibited the installation of third-party PDF compilation libraries to maintain environment integrity.
 
 ---
 
 ## 4. Academic Integrity Statement
 
 I confirm that:
-1. The prompts recorded above represent the genuine, unaltered prompts exchanged with the AI assistant during this project.
-2. All business governance rules, risk thresholds, airline actions, and policy criteria were determined and specified by me.
-3. The functional application was manually tested and validated by me prior to submission.
+1. The prompts recorded in this document represent the actual, unaltered prompt history exchanged with the AI assistant during this project.
+2. All business governance rules, risk thresholds, airline actions, and policy criteria were determined, reviewed, and verified by me.
+3. The functional application was manually inspected, tested, and validated by me prior to submission.
 
 **Student Name / Enrolment ID:** `PGD202564221`  
 **Date:** November 19, 2026
