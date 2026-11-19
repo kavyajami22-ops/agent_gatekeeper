@@ -164,23 +164,19 @@ $y2 -= 4
 $sy6 = $y2 + 5
 [void]$p2.Add("BT /F2 10.5 Tf 0.0 0.106 0.58 rg 36 $sy6 Td (6. Empirical Testing & Validation Results \(Automated Test Suite: test_gatekeeper.py\)) Tj ET")
 
-$y_table = $y2 - 17
-$row_h = 13.5
+$y_table = $y2 - 18
+$row_h = 16.5
 [void]$p2.Add("0.0 0.106 0.58 rg 36 $y_table 523.28 $row_h re f")
-$ty = $y_table + 4
-[void]$p2.Add("BT /F2 7 Tf 1 1 1 rg 40 $ty Td (Test ID) Tj 78 $ty Td (Scenario Description) Tj 225 $ty Td (Input Parameters) Tj 355 $ty Td (Expected Verdict) Tj 455 $ty Td (Actual Test Result) Tj ET")
+$ty = $y_table + 5
+[void]$p2.Add("BT /F2 7.5 Tf 1 1 1 rg 42 $ty Td (Scenario Name) Tj 205 $ty Td (Expected Decision) Tj 355 $ty Td (Actual Decision) Tj 480 $ty Td (Final Status) Tj ET")
 
 $tests = @(
-    @("T-01", "Database schema initialization", "SQLite schema & seed data", "5 Seeded Agents", "Passed (5 loaded)"),
-    @("T-02", "Action 1: View flight fares", "AGT-MMT-001, Fare Query", "ALLOW", "Passed (EXECUTED)"),
-    @("T-03", "Action 2: Booking <= Rs. 8,000", "AGT-MMT-001, Rs. 4,800 fare", "ALLOW", "Passed (EXECUTED)"),
-    @("T-04", "Action 2: Booking > Rs. 8,000", "AGT-MMT-001, Rs. 9,500 fare", "ASK CUSTOMER", "Passed (PENDING)"),
-    @("T-05", "Action 3: Flight change request", "AGT-MMT-001, Rs. 1,200 fee", "ASK CUSTOMER", "Passed (PENDING)"),
-    @("T-06", "Action 4: Refund request", "AGT-MMT-001, Rs. 4,800 refund", "ASK CUSTOMER", "Passed (PENDING)"),
-    @("T-07", "Revoked agent lockdown", "AGT-ROG-005, Fare Query", "BLOCK", "Passed (Access Denied)"),
-    @("T-08", "Dynamic Kill-Switch & Timestamps", "Revoke AGT-EXP-002", "Timestamp & BLOCK", "Passed (Timestamp logged)"),
-    @("T-09", "Human-in-the-Loop approval", "Approve pending REQ-6E", "Status -> APPROVED", "Passed (State updated)"),
-    @("T-10", "Permanent Audit Log integrity", "Query all audit_log rows", "Immutable Ledger", "Passed (All events logged)")
+    @("1. Registered Agent with Read-Only Permission", "ALLOW (Fare) / BLOCK (Booking)", "ALLOW (Fare) / BLOCK (Booking)", "PASS"),
+    @("2. Unknown or Unregistered Agent", "BLOCK", "BLOCK", "PASS"),
+    @("3. Booking Amount Above Rs. 8,000 Threshold", "ASK CUSTOMER", "ASK CUSTOMER", "PASS"),
+    @("4. Booking Amount At or Below Rs. 8,000", "ALLOW", "ALLOW", "PASS"),
+    @("5. Revoked Agent Attempting Any Request", "BLOCK", "BLOCK", "PASS"),
+    @("6. Custom: Mandatory Refund & Customer Sign-Off", "ASK CUSTOMER -> PENDING -> APPROVED", "ASK CUSTOMER -> PENDING -> APPROVED", "PASS")
 )
 
 $y_curr = $y_table - $row_h
@@ -189,20 +185,19 @@ foreach ($t in $tests) {
     $bg = if ($idx % 2 -eq 0) { "0.96 0.97 0.99" } else { "1.0 1.0 1.0" }
     [void]$p2.Add("$bg rg 36 $y_curr 523.28 $row_h re f")
     [void]$p2.Add("0.88 0.9 0.92 RG 0.4 w 36 $y_curr 523.28 $row_h re S")
-    $rty = $y_curr + 4
-    $t0 = $t[0]; $t1 = $t[1]; $t2 = $t[2]; $t3 = $t[3]; $t4 = $t[4]
-    [void]$p2.Add("BT /F2 6.5 Tf 0.1 0.15 0.2 rg 40 $rty Td ($t0) Tj ET")
-    [void]$p2.Add("BT /F1 6.5 Tf 0.2 0.2 0.2 rg 78 $rty Td ($t1) Tj ET")
-    [void]$p2.Add("BT /F1 6.5 Tf 0.3 0.3 0.3 rg 225 $rty Td ($t2) Tj ET")
-    [void]$p2.Add("BT /F2 6.5 Tf 0.0 0.106 0.58 rg 355 $rty Td ($t3) Tj ET")
-    [void]$p2.Add("BT /F2 6.5 Tf 0.06 0.6 0.3 rg 455 $rty Td ($t4) Tj ET")
+    $rty = $y_curr + 5
+    $t0 = $t[0]; $t1 = $t[1]; $t2 = $t[2]; $t3 = $t[3]
+    [void]$p2.Add("BT /F2 6.5 Tf 0.1 0.15 0.2 rg 42 $rty Td ($t0) Tj ET")
+    [void]$p2.Add("BT /F1 6.5 Tf 0.2 0.2 0.2 rg 205 $rty Td ($t1) Tj ET")
+    [void]$p2.Add("BT /F1 6.5 Tf 0.0 0.106 0.58 rg 355 $rty Td ($t2) Tj ET")
+    [void]$p2.Add("BT /F2 7 Tf 0.06 0.6 0.3 rg 485 $rty Td ($t3) Tj ET")
     $y_curr -= $row_h
     $idx++
 }
 [void]$p2.Add("Q")
 
 # SECTION 7
-$y3 = $y_curr - 8
+$y3 = $y_curr - 12
 [void]$p2.Add("q")
 [void]$p2.Add("0.0 0.106 0.58 rg 36 $y3 523.28 1.5 re f")
 $sy7 = $y3 + 5
@@ -265,4 +260,4 @@ $trailer = $enc.GetBytes("trailer`n<< /Size $($objects.Count + 1) /Root 1 0 R >>
 $ms.Write($trailer, 0, $trailer.Length)
 
 [System.IO.File]::WriteAllBytes($outPath, $ms.ToArray())
-Write-Output "Successfully generated $outPath ($($ms.Length) bytes, exactly 2 A4 pages)."
+Write-Output "Successfully updated $outPath ($($ms.Length) bytes, exactly 2 A4 pages)."
