@@ -43,7 +43,7 @@ agent_gatekeeper/
 ├── server.py                  # 🚀 Zero-Dependency Pure Python Web Dashboard (Runs out-of-the-box!)
 ├── run.bat                    # 🖱️ One-Click Windows launcher (Double-click to launch!)
 ├── app.py                     # Streamlit web application (alternative option)
-├── test_gatekeeper.py         # Automated 10-test verification test suite
+├── test_gatekeeper.py         # Automated 6-scenario verification test suite
 ├── requirements.txt           # Optional dependencies for Streamlit: streamlit, pandas, plotly
 ├── README.md                  # Comprehensive documentation & test walkthrough
 ├── REPORT.md                  # 2-Page MBA Project Report
@@ -118,148 +118,155 @@ The web interface is organized into four intuitive, functional tabs:
 
 Follow these six step-by-step test scenarios during your grading evaluation or demonstration to prove that all Gatekeeper governance rules are strictly enforced:
 
-```
-+-----------------------------------------------------------------------------------------------------+
-| Test Case | Scenario Description          | Key Parameter / Condition | Expected Gatekeeper Verdict |
-+-----------------------------------------------------------------------------------------------------+
-| Case 1    | Low-Value Booking / Fare View | Booking <= Rs. 8,000      | 🟢 ALLOW (Auto-Executed)    |
-| Case 2    | High-Value Flight Booking     | Booking > Rs. 8,000       | 🟡 ASK CUSTOMER (Held)      |
-| Case 3    | Flight Modification Request   | Any Flight Change         | 🟡 ASK CUSTOMER (Mandatory) |
-| Case 4    | Ticket Refund Request         | Any Refund Request        | 🟡 ASK CUSTOMER (Mandatory) |
-| Case 5    | Revoked Agent Attempt         | Agent Status: REVOKED     | 🔴 BLOCK (Access Denied)    |
-| Case 6    | Permanent Audit Trail & Export| Full Transaction History  | ✅ Immutable Log & CSV Export|
-+-----------------------------------------------------------------------------------------------------+
-```
-
-#### 🔹 Test Case 1: Autonomous Allowed Booking ($\le$ ₹8,000)
-* **Goal:** Verify that pre-authorized, low-risk requests execute without human friction.
+#### 🔹 Test Case 1: Registered Agent with Read-Only Permission
+* **Goal:** Verify that a registered agent with read-only permissions can view fares without friction, but is blocked from booking flights.
 * **Steps:**
   1. Open **Tab 1: Live Agent Simulator**.
-  2. Select Agent: **MakeMyTrip Autonomous Booker (`AGT-MMT-001`)** (Status: `ACTIVE`).
-  3. Select Action: **Book a flight**.
-  4. Select Itinerary: **Delhi (DEL) $\rightarrow$ Bengaluru (BLR) | Flight 6E-501 (Fare: ₹7,200.00)**.
-  5. Click **🚀 Dispatch Request to Gatekeeper**.
-* **Expected Outcome:** 🟢 **`VERDICT: ALLOW`**
-  * Status is marked as `EXECUTED`.
-  * Policy rationale confirms: *"Booking value of ₹7,200.00 is within the pre-approved limit of ₹8,000.00. Auto-authorized without human friction."*
+  2. Select Agent: **`AGT-READONLY-01`** (or `AGT-MMT-001` with *View flight fares*).
+  3. Action A: Select **View flight fares** $\rightarrow$ Click **🚀 Dispatch Request**.
+  4. Action B: Select **Book a flight** $\rightarrow$ Click **🚀 Dispatch Request**.
+* **Expected Outcome:** 
+  * Fare Query: 🟢 **`ALLOW`** (Status: `EXECUTED`).
+  * Booking Attempt: 🔴 **`BLOCK`** (Status: `BLOCKED` — *Permission Denied: Missing Scope*).
 
 ---
 
-#### 🔹 Test Case 2: High-Value Booking Above Threshold ($>$ ₹8,000)
+#### 🔹 Test Case 2: Unknown or Unregistered Agent
+* **Goal:** Verify that unverified or unregistered agent IDs are denied at the perimeter.
+* **Steps:**
+  1. In **Tab 1: Live Agent Simulator**, dispatch a request using an unregistered agent ID (`AGT-UNKNOWN-999`).
+* **Expected Outcome:** 🔴 **`BLOCK`**
+  * Status: `BLOCKED`.
+  * Policy rationale confirms: *"Security Violation: Agent ID 'AGT-UNKNOWN-999' is not registered in the IndiGo Agent Directory."*
+
+---
+
+#### 🔹 Test Case 3: High-Value Booking Above Threshold ($>$ ₹8,000)
 * **Goal:** Verify that transactions exceeding the ₹8,000 limit trigger human-in-the-loop protection.
 * **Steps:**
   1. In **Tab 1: Live Agent Simulator**, select Agent: **Personal Gemini Travel Agent (`AGT-GEM-003`)**.
   2. Select Action: **Book a flight**.
   3. Select Itinerary: **Mumbai (BOM) $\rightarrow$ Goa (GOI) | Flight 6E-802 (Fare: ₹9,500.00)** (or enter any amount $> ₹8,000$).
   4. Click **🚀 Dispatch Request to Gatekeeper**.
-* **Expected Outcome:** 🟡 **`VERDICT: ASK CUSTOMER`**
+* **Expected Outcome:** 🟡 **`ASK CUSTOMER`**
   * Status is marked as `PENDING_CUSTOMER`.
   * Rationale explains: *"Booking value of ₹9,500.00 EXCEEDS the pre-approved limit of ₹8,000.00. Sent to Customer Confirmation Portal."*
   * **Demonstrate Confirmation:** Switch to **Tab 2: Confirmation Inbox**, review the pending ₹9,500 booking, and click **`✅ Approve Action`**. Notice the status immediately transitions to `APPROVED`.
 
 ---
 
-#### 🔹 Test Case 3: Mandatory Customer Confirmation for Flight Changes
-* **Goal:** Verify that schedule modifications strictly require human authorization to prevent itinerary clashes and change fees.
-* **Steps:**
-  1. In **Tab 1: Live Agent Simulator**, select Agent: **Expedia Travel Assistant (`AGT-EXP-002`)**.
-  2. Select Action: **Change a flight booking**.
-  3. Enter PNR: `6E-K9P2X` and change fee amount: `₹1,500.00`.
-  4. Click **🚀 Dispatch Request to Gatekeeper**.
-* **Expected Outcome:** 🟡 **`VERDICT: ASK CUSTOMER`**
-  * Status is marked as `PENDING_CUSTOMER`.
-  * Rationale explains: *"Policy Requirement: Every flight schedule modification requires passenger consent to confirm flight timings and potential fare difference/change fees."*
-
----
-
-#### 🔹 Test Case 4: Mandatory Customer Confirmation for Refund Requests
-* **Goal:** Verify that ticket cancellations and refunds strictly require human sign-off to protect seat inventory and financial payouts.
+#### 🔹 Test Case 4: Booking Below ₹8,000 Threshold ($\le$ ₹8,000)
+* **Goal:** Verify that booking transactions at or below ₹8,000 execute autonomously without friction.
 * **Steps:**
   1. In **Tab 1: Live Agent Simulator**, select Agent: **MakeMyTrip Autonomous Booker (`AGT-MMT-001`)**.
-  2. Select Action: **Request a refund**.
-  3. Enter PNR: `6E-M9K2L` and refundable fare: `₹4,800.00`.
+  2. Select Action: **Book a flight**.
+  3. Select Itinerary: **Delhi (DEL) $\rightarrow$ Mumbai (BOM) | Flight 6E-204 (Fare: ₹4,800.00)** ($\le$ ₹8,000).
   4. Click **🚀 Dispatch Request to Gatekeeper**.
-* **Expected Outcome:** 🟡 **`VERDICT: ASK CUSTOMER`**
-  * Status is marked as `PENDING_CUSTOMER`.
-  * Rationale explains: *"Policy Requirement: Every refund request releases airline seat inventory and triggers payout. Mandatory passenger confirmation required to prevent unauthorized ticket cancellation."*
+* **Expected Outcome:** 🟢 **`ALLOW`**
+  * Status is marked as `EXECUTED`.
+  * Rationale confirms: *"Booking value of ₹4,800.00 is within the pre-approved limit of ₹8,000.00. Auto-authorized without human friction."*
 
 ---
 
-#### 🔹 Test Case 5: Emergency Revocation Kill-Switch (`BLOCK`)
+#### 🔹 Test Case 5: Revoked Agent Attempting Any Request
 * **Goal:** Verify that revoked agents are completely locked down across all operations.
 * **Steps:**
   1. Open **Tab 3: Agent Directory & Revocation**.
-  2. Under **Revocation & Access Control**, select an active agent: **Expedia Travel Assistant (`AGT-EXP-002`)**.
-  3. Click **`🚨 Invoke Kill Switch: REVOKE AGENT`**.
-  4. Observe that the status immediately turns to **`REVOKED`** and a permanent timestamp is recorded in the table under `Revoked At`.
-  5. Return to **Tab 1: Live Agent Simulator**, select `AGT-EXP-002`, and attempt any action (even a harmless read-only *View flight fares*).
-  6. Click **🚀 Dispatch Request to Gatekeeper**.
-* **Expected Outcome:** 🔴 **`VERDICT: BLOCK`**
+  2. Select an active agent (e.g. `AGT-EXP-002`) and click **`🚨 Invoke Kill Switch: REVOKE AGENT`** (or select pre-seeded revoked agent `AGT-ROG-005`).
+  3. In **Tab 1**, attempt any request (even a read-only *View flight fares*) using the revoked agent.
+  4. Click **🚀 Dispatch Request to Gatekeeper**.
+* **Expected Outcome:** 🔴 **`BLOCK`**
   * Status is marked as `BLOCKED`.
   * Rationale explains: *"Security Lockdown: Agent access was REVOKED. All incoming requests are strictly BLOCKED."*
 
 ---
 
-#### 🔹 Test Case 6: Permanent Audit Trail & Regulatory CSV Export
-* **Goal:** Verify that every transaction, decision, and customer approval is permanently preserved in the immutable SQLite ledger and exportable for audit compliance.
+#### 🔹 Test Case 6: Custom Scenario — Mandatory Refund & Customer Sign-Off
+* **Goal:** Verify that ticket refunds strictly require passenger authorization and follow the two-phase lifecycle: `ASK CUSTOMER` $\rightarrow$ `PENDING_CUSTOMER` $\rightarrow$ `APPROVED`.
 * **Steps:**
-  1. Open **Tab 4: Audit Log & Analytics**.
-  2. Observe the KPI summary tiles displaying total intercepted requests, allowed percentages, customer inquiries, and blocked violations.
-  3. Inspect the audit log table: verify that every action from Test Cases 1 through 5 is recorded in chronological order with exact timestamps, agent IDs, decisions, and outcomes.
-  4. Click the **`📥 Export CSV`** button at the top right of the table.
-* **Expected Outcome:** ✅ **`Permanent Immutable Verification & Download`**
-  * The browser immediately downloads `IndiGo_Gatekeeper_AuditLog.csv`.
-  * Open the CSV file in Excel or Notepad to verify complete data integrity and non-repudiation under DGCA and Indian DPDP Act standards.
+  1. In **Tab 1: Live Agent Simulator**, select Agent: **MakeMyTrip Autonomous Booker (`AGT-MMT-001`)**.
+  2. Select Action: **Request a refund** (Amount: ₹7,200.00 for flight 6E-501).
+  3. Click **🚀 Dispatch Request to Gatekeeper**.
+  4. Switch to **Tab 2: Confirmation Inbox** and click **`✅ Approve Action`**.
+* **Expected Outcome:** 
+  * Initial Verdict: 🟡 **`ASK CUSTOMER`** (Status: `PENDING_CUSTOMER`).
+  * Post-Approval Status: **`APPROVED`** (Simulated execution confirmed and permanently logged in SQLite).
 
 ---
 
 ## 🧪 5. Automated Verification Tests
 
-In addition to manual UI testing, you can execute the automated test suite directly from your terminal:
+You can execute the automated test suite directly from your terminal:
 
 ```powershell
 python test_gatekeeper.py
 ```
 
-### Actual Test Suite Execution Results:
+### Official Automated Test Results Table
+
+| Scenario Name | Expected Decision | Actual Decision | Final Status |
+| :--- | :--- | :--- | :---: |
+| **1. Registered Agent with Read-Only Permission** | `ALLOW` (Fare query) / `BLOCK` (Booking attempt) | `ALLOW` (Fare query) / `BLOCK` (Booking attempt) | **PASS** |
+| **2. Unknown or Unregistered Agent** | `BLOCK` | `BLOCK` | **PASS** |
+| **3. Booking Amount Above ₹8,000 Threshold** | `ASK CUSTOMER` | `ASK CUSTOMER` | **PASS** |
+| **4. Booking Amount At or Below ₹8,000 Threshold** | `ALLOW` | `ALLOW` | **PASS** |
+| **5. Revoked Agent Attempting Any Request** | `BLOCK` | `BLOCK` | **PASS** |
+| **6. Custom Scenario: Mandatory Refund & Customer Sign-Off** | `ASK CUSTOMER → PENDING_CUSTOMER → APPROVED after customer approval` | `ASK CUSTOMER → PENDING_CUSTOMER → APPROVED after customer approval` | **PASS** |
+
+### Raw Terminal Output:
 ```text
-=================================================================
-✈️  STARTING INDIGO AGENT GATEKEEPER VERIFICATION TEST SUITE
-=================================================================
-[Test 1] Initializing SQLite database and seeding sample data...
-✅ DB initialized with 5 agents.
+======================================================================
+✈️  INDIGO AIRLINES AGENT GATEKEEPER — AUTOMATED VERIFICATION TEST SUITE
+======================================================================
 
-[Test 2] Testing Action 1: 'View flight fares'...
-✅ View fares passed: Verdict=ALLOW, Status=EXECUTED
+[Scenario 1] Testing registered agent with read-only permission...
+  -> Fare View Verdict: ALLOW (Status: EXECUTED)
+  -> Unauthorized Booking Verdict: BLOCK (Status: BLOCKED)
+  -> Result: PASS
 
-[Test 3] Testing Action 2: Booking <= ₹8,000 (₹4,800)...
-✅ Booking <= ₹8,000 passed: Verdict=ALLOW, Status=EXECUTED
+[Scenario 2] Testing unknown / unregistered agent...
+  -> Verdict: BLOCK (Status: BLOCKED)
+  -> Reason: Security Violation: Agent ID 'AGT-UNKNOWN-999' is not registered in the IndiGo Agent Directory.
+  -> Result: PASS
 
-[Test 4] Testing Action 2: Booking > ₹8,000 (₹9,500)...
-✅ Booking > ₹8,000 passed: Verdict=ASK CUSTOMER, Status=PENDING_CUSTOMER
+[Scenario 3] Testing booking above ₹8,000 threshold (₹9,500)...
+  -> Verdict: ASK CUSTOMER (Status: PENDING_CUSTOMER)
+  -> Reason: Booking value of ₹9,500.00 EXCEEDS the pre-approved limit of ₹8,000.00. Sent to Customer Confirmation Portal for explicit approval.
+  -> Result: PASS
 
-[Test 5] Testing Action 3: 'Change a flight booking'...
-✅ Flight change passed: Verdict=ASK CUSTOMER, Status=PENDING_CUSTOMER
+[Scenario 4] Testing booking below ₹8,000 threshold (₹4,800)...
+  -> Verdict: ALLOW (Status: EXECUTED)
+  -> Reason: Booking value of ₹4,800.00 is within the pre-approved limit of ₹8,000.00. Auto-authorized without human friction.
+  -> Result: PASS
 
-[Test 6] Testing Action 4: 'Request a refund'...
-✅ Refund request passed: Verdict=ASK CUSTOMER, Status=PENDING_CUSTOMER
+[Scenario 5] Testing revoked agent making a request...
+  -> Verdict: BLOCK (Status: BLOCKED)
+  -> Reason: Security Lockdown: Agent 'ScraperBot BlackHat AI' (AGT-ROG-005) access was REVOKED on 2026-11-19 18:18:59. All incoming requests are strictly BLOCKED.
+  -> Result: PASS
 
-[Test 7] Testing Rule #5: Revoked agent must ALWAYS return BLOCK...
-✅ Revoked agent test passed: Verdict=BLOCK
+[Scenario 6] Testing Custom Scenario: Mandatory Refund Request & Customer Sign-Off...
+  -> Initial Gatekeeper Verdict: ASK CUSTOMER (Status: PENDING_CUSTOMER)
+  -> Post-Approval Status: APPROVED
+  -> Result: PASS
 
-[Test 8] Testing Dynamic Revocation Kill-Switch & Permanent Timestamps...
-✅ Agent AGT-EXP-002 revoked successfully. Revoked timestamp logged.
-✅ Newly revoked agent request instantly BLOCKED.
-
-[Test 9] Testing Human-in-the-Loop Customer Approval...
-✅ Customer confirmation passed: Status updated to APPROVED
-
-[Test 10] Verifying Permanent Audit Log integrity...
-✅ Permanent Audit Log contains 20 immutable entries.
-
-=================================================================
-🎉 ALL 10 VERIFICATION TESTS PASSED SUCCESSFULLY!
-=================================================================
+======================================================================
+📊 SUMMARY TEST REPORT — ALL SIX SCENARIOS
+======================================================================
+✅ [PASS] Scenario 1: Registered Agent with Read-Only Permission
+    Details: Fare View: ALLOW | Booking without scope: BLOCK
+✅ [PASS] Scenario 2: Unknown / Unregistered Agent
+    Details: Verdict: BLOCK | Reason: Security Violation: Agent ID 'AGT-UNKNOWN-999' is not registered in the IndiGo Agent Directory.
+✅ [PASS] Scenario 3: Booking Above ₹8,000 (₹9,500)
+    Details: Verdict: ASK CUSTOMER | Status: PENDING_CUSTOMER
+✅ [PASS] Scenario 4: Booking Below ₹8,000 (₹4,800)
+    Details: Verdict: ALLOW | Status: EXECUTED
+✅ [PASS] Scenario 5: Revoked Agent Attempt
+    Details: Verdict: BLOCK | Reason: Security Lockdown: Agent 'ScraperBot BlackHat AI' (AGT-ROG-005) access was REVOKED on 2026-11-19 18:18:59. All incoming requests are strictly BLOCKED.
+✅ [PASS] Scenario 6: Custom — Mandatory Refund & Customer Sign-Off
+    Details: Initial: ASK CUSTOMER (PENDING_CUSTOMER) -> After Customer Approval: APPROVED
+======================================================================
+🎉 ALL SIX REQUIRED TEST SCENARIOS PASSED SUCCESSFULLY!
+======================================================================
 ```
 
 ---
