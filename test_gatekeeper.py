@@ -1,6 +1,6 @@
 """
 Automated Verification & Test Suite for IndiGo Agent Gatekeeper (6E Guard)
-Validates all MBA project rules, thresholds, and edge cases.
+Validates the six required MBA project test scenarios.
 """
 import sys
 from pathlib import Path
@@ -14,6 +14,7 @@ from core.database import (
     get_all_agents,
     get_agent,
     update_agent_status,
+    register_agent,
     get_pending_requests,
     get_all_audit_logs,
     update_request_decision_by_customer,
@@ -38,155 +39,208 @@ from core.config import (
     AGENT_STATUS_REVOKED,
 )
 
-def run_all_tests():
-    print("=" * 65)
-    print("✈️  STARTING INDIGO AGENT GATEKEEPER VERIFICATION TEST SUITE")
-    print("=" * 65)
+def run_tests():
+    print("=" * 70)
+    print("✈️  INDIGO AIRLINES AGENT GATEKEEPER — AUTOMATED VERIFICATION TEST SUITE")
+    print("=" * 70)
 
-    # 1. Initialize & Seed DB
-    print("\n[Test 1] Initializing SQLite database and seeding sample data...")
+    # Initialize fresh database and seed data
     reset_database()
     seed_sample_data(force=True)
-    agents = get_all_agents()
-    assert len(agents) >= 5, f"Expected at least 5 seeded agents, found {len(agents)}"
-    print(f"✅ DB initialized with {len(agents)} agents.")
-
     engine = GatekeeperEngine(booking_threshold=8000.0)
 
-    # 2. Test Rule #1: View Fares -> ALLOW
-    print("\n[Test 2] Testing Action 1: 'View flight fares'...")
-    res = engine.evaluate_request(
-        agent_id="AGT-MMT-001",
+    test_results = []
+
+    # -------------------------------------------------------------------------
+    # Scenario 1: Registered agent with read-only permission
+    # -------------------------------------------------------------------------
+    print("\n[Scenario 1] Testing registered agent with read-only permission...")
+    # Register an agent with ONLY read-only scope (can_view_fares=True, all others False)
+    register_agent(
+        agent_id="AGT-READONLY-01",
+        name="Skyscanner Fare Explorer",
+        developer="Skyscanner Ltd",
+        can_view_fares=True,
+        can_book=False,
+        can_change_booking=False,
+        can_request_refund=False,
+        custom_spending_limit=8000.0,
+        status=AGENT_STATUS_ACTIVE
+    )
+    # 1A: Reading fares should be ALLOWED
+    res_read = engine.evaluate_request(
+        agent_id="AGT-READONLY-01",
         action=ACTION_VIEW_FARES,
-        customer_id="CUST-001",
-        pnr="6E-10101",
+        customer_id="CUST-6E-101",
+        pnr="6E-R001",
         flight_details="DEL -> BOM | 6E-204",
         amount=0.0
     )
-    assert res["decision"] == DECISION_ALLOW, f"Expected ALLOW, got {res['decision']}"
-    assert res["status"] == STATUS_EXECUTED, f"Expected EXECUTED, got {res['status']}"
-    print(f"✅ View fares passed: Verdict={res['decision']}, Status={res['status']}")
-
-    # 3. Test Rule #2: Booking <= ₹8,000 -> ALLOW
-    print("\n[Test 3] Testing Action 2: Booking <= ₹8,000 (₹4,800)...")
-    res = engine.evaluate_request(
-        agent_id="AGT-MMT-001",
+    # 1B: Attempting a booking without booking scope should be BLOCKED
+    res_nobook = engine.evaluate_request(
+        agent_id="AGT-READONLY-01",
         action=ACTION_BOOK_FLIGHT,
-        customer_id="CUST-001",
-        pnr="6E-10102",
+        customer_id="CUST-6E-101",
+        pnr="6E-R002",
         flight_details="DEL -> BOM | 6E-204",
-        amount=4800.0
+        amount=4500.0
     )
-    assert res["decision"] == DECISION_ALLOW, f"Expected ALLOW, got {res['decision']}"
-    assert res["status"] == STATUS_EXECUTED, f"Expected EXECUTED, got {res['status']}"
-    print(f"✅ Booking <= ₹8,000 passed: Verdict={res['decision']}, Status={res['status']}")
 
-    # 4. Test Rule #3: Booking > ₹8,000 -> ASK CUSTOMER
-    print("\n[Test 4] Testing Action 2: Booking > ₹8,000 (₹9,500)...")
-    res = engine.evaluate_request(
+    s1_pass = (
+        res_read["decision"] == DECISION_ALLOW and 
+        res_read["status"] == STATUS_EXECUTED and
+        res_nobook["decision"] == DECISION_BLOCK and
+        res_nobook["status"] == STATUS_BLOCKED
+    )
+    test_results.append(("Scenario 1: Registered Agent with Read-Only Permission", "PASS" if s1_pass else "FAIL", 
+                         f"Fare View: {res_read['decision']} | Booking without scope: {res_nobook['decision']}"))
+    print(f"  -> Fare View Verdict: {res_read['decision']} (Status: {res_read['status']})")
+    print(f"  -> Unauthorized Booking Verdict: {res_nobook['decision']} (Status: {res_nobook['status']})")
+    print(f"  -> Result: {'PASS' if s1_pass else 'FAIL'}")
+
+    # -------------------------------------------------------------------------
+    # Scenario 2: Unknown or unregistered agent
+    # -------------------------------------------------------------------------
+    print("\n[Scenario 2] Testing unknown / unregistered agent...")
+    res_unknown = engine.evaluate_request(
+        agent_id="AGT-UNKNOWN-999",
+        action=ACTION_VIEW_FARES,
+        customer_id="CUST-6E-999",
+        pnr="6E-X999",
+        flight_details="DEL -> BLR | 6E-501",
+        amount=0.0
+    )
+    s2_pass = (
+        res_unknown["decision"] == DECISION_BLOCK and 
+        res_unknown["status"] == STATUS_BLOCKED and
+        "not registered" in res_unknown["reason"].lower()
+    )
+    test_results.append(("Scenario 2: Unknown / Unregistered Agent", "PASS" if s2_pass else "FAIL", 
+                         f"Verdict: {res_unknown['decision']} | Reason: {res_unknown['reason']}"))
+    print(f"  -> Verdict: {res_unknown['decision']} (Status: {res_unknown['status']})")
+    print(f"  -> Reason: {res_unknown['reason']}")
+    print(f"  -> Result: {'PASS' if s2_pass else 'FAIL'}")
+
+    # -------------------------------------------------------------------------
+    # Scenario 3: Booking above ₹8,000 threshold
+    # -------------------------------------------------------------------------
+    print("\n[Scenario 3] Testing booking above ₹8,000 threshold (₹9,500)...")
+    res_above = engine.evaluate_request(
         agent_id="AGT-MMT-001",
         action=ACTION_BOOK_FLIGHT,
-        customer_id="CUST-001",
-        pnr="6E-10103",
-        flight_details="BOM -> GOI | 6E-802",
+        customer_id="CUST-6E-202",
+        pnr="6E-H7Y1Q",
+        flight_details="BOM -> GOI | Flight 6E-802 (Fare: ₹9,500.00)",
         amount=9500.0
     )
-    assert res["decision"] == DECISION_ASK_CUSTOMER, f"Expected ASK CUSTOMER, got {res['decision']}"
-    assert res["status"] == STATUS_PENDING_CUSTOMER, f"Expected PENDING_CUSTOMER, got {res['status']}"
-    req_to_approve = res["request_id"]
-    print(f"✅ Booking > ₹8,000 passed: Verdict={res['decision']}, Status={res['status']}")
-
-    # 5. Test Rule #4A: Change Booking -> Mandatory ASK CUSTOMER
-    print("\n[Test 5] Testing Action 3: 'Change a flight booking'...")
-    res = engine.evaluate_request(
-        agent_id="AGT-MMT-001",
-        action=ACTION_CHANGE_BOOKING,
-        customer_id="CUST-001",
-        pnr="6E-10104",
-        flight_details="Reschedule 6E-204 to evening",
-        amount=1200.0
+    s3_pass = (
+        res_above["decision"] == DECISION_ASK_CUSTOMER and 
+        res_above["status"] == STATUS_PENDING_CUSTOMER
     )
-    assert res["decision"] == DECISION_ASK_CUSTOMER, f"Expected ASK CUSTOMER, got {res['decision']}"
-    assert res["status"] == STATUS_PENDING_CUSTOMER, f"Expected PENDING_CUSTOMER, got {res['status']}"
-    print(f"✅ Flight change passed: Verdict={res['decision']}, Status={res['status']}")
+    test_results.append(("Scenario 3: Booking Above ₹8,000 (₹9,500)", "PASS" if s3_pass else "FAIL", 
+                         f"Verdict: {res_above['decision']} | Status: {res_above['status']}"))
+    print(f"  -> Verdict: {res_above['decision']} (Status: {res_above['status']})")
+    print(f"  -> Reason: {res_above['reason']}")
+    print(f"  -> Result: {'PASS' if s3_pass else 'FAIL'}")
 
-    # 6. Test Rule #4B: Request Refund -> Mandatory ASK CUSTOMER
-    print("\n[Test 6] Testing Action 4: 'Request a refund'...")
-    res = engine.evaluate_request(
+    # -------------------------------------------------------------------------
+    # Scenario 4: Booking below ₹8,000 threshold
+    # -------------------------------------------------------------------------
+    print("\n[Scenario 4] Testing booking below ₹8,000 threshold (₹4,800)...")
+    res_below = engine.evaluate_request(
         agent_id="AGT-MMT-001",
-        action=ACTION_REQUEST_REFUND,
-        customer_id="CUST-001",
-        pnr="6E-10105",
-        flight_details="Cancel 6E-204 and refund fare",
+        action=ACTION_BOOK_FLIGHT,
+        customer_id="CUST-6E-101",
+        pnr="6E-K2L8M",
+        flight_details="DEL -> BOM | Flight 6E-204 (Fare: ₹4,800.00)",
         amount=4800.0
     )
-    assert res["decision"] == DECISION_ASK_CUSTOMER, f"Expected ASK CUSTOMER, got {res['decision']}"
-    assert res["status"] == STATUS_PENDING_CUSTOMER, f"Expected PENDING_CUSTOMER, got {res['status']}"
-    print(f"✅ Refund request passed: Verdict={res['decision']}, Status={res['status']}")
+    s4_pass = (
+        res_below["decision"] == DECISION_ALLOW and 
+        res_below["status"] == STATUS_EXECUTED
+    )
+    test_results.append(("Scenario 4: Booking Below ₹8,000 (₹4,800)", "PASS" if s4_pass else "FAIL", 
+                         f"Verdict: {res_below['decision']} | Status: {res_below['status']}"))
+    print(f"  -> Verdict: {res_below['decision']} (Status: {res_below['status']})")
+    print(f"  -> Reason: {res_below['reason']}")
+    print(f"  -> Result: {'PASS' if s4_pass else 'FAIL'}")
 
-    # 7. Test Rule #5: Revoked Agent -> Always BLOCK
-    print("\n[Test 7] Testing Rule #5: Revoked agent must ALWAYS return BLOCK...")
+    # -------------------------------------------------------------------------
+    # Scenario 5: Revoked agent making a request
+    # -------------------------------------------------------------------------
+    print("\n[Scenario 5] Testing revoked agent making a request...")
     res_revoked = engine.evaluate_request(
         agent_id="AGT-ROG-005",  # Pre-seeded as REVOKED
-        action=ACTION_VIEW_FARES,  # Even safe fare view must be blocked!
-        customer_id="CUST-001",
-        pnr="6E-10106",
-        flight_details="DEL -> BOM",
+        action=ACTION_VIEW_FARES,  # Even read-only request must be blocked
+        customer_id="CUST-6E-555",
+        pnr="6E-REV01",
+        flight_details="DEL -> BOM | 6E-204",
         amount=0.0
     )
-    assert res_revoked["decision"] == DECISION_BLOCK, f"Expected BLOCK, got {res_revoked['decision']}"
-    assert res_revoked["status"] == STATUS_BLOCKED, f"Expected BLOCKED, got {res_revoked['status']}"
-    print(f"✅ Revoked agent test passed: Verdict={res_revoked['decision']}, Reason={res_revoked['reason']}")
-
-    # 8. Test Dynamic Revocation Kill-Switch & Timestamps
-    print("\n[Test 8] Testing Dynamic Revocation Kill-Switch & Permanent Timestamps...")
-    agent_before = get_agent("AGT-EXP-002")
-    assert agent_before["status"] == AGENT_STATUS_ACTIVE
-    assert agent_before["revoked_at"] is None
-
-    # Trigger revocation
-    update_agent_status("AGT-EXP-002", AGENT_STATUS_REVOKED, reason="Suspicious API rate limit breach")
-    agent_after = get_agent("AGT-EXP-002")
-    assert agent_after["status"] == AGENT_STATUS_REVOKED
-    assert agent_after["revoked_at"] is not None
-    print(f"✅ Agent AGT-EXP-002 revoked successfully. Revoked timestamp: {agent_after['revoked_at']}")
-
-    # Verify requests from newly revoked agent are now BLOCKED
-    res_newly_revoked = engine.evaluate_request(
-        agent_id="AGT-EXP-002",
-        action=ACTION_VIEW_FARES,
-        customer_id="CUST-001",
-        pnr="6E-10107",
-        flight_details="DEL -> BOM",
-        amount=0.0
+    s5_pass = (
+        res_revoked["decision"] == DECISION_BLOCK and 
+        res_revoked["status"] == STATUS_BLOCKED and
+        "revoked" in res_revoked["reason"].lower()
     )
-    assert res_newly_revoked["decision"] == DECISION_BLOCK
-    print(f"✅ Newly revoked agent request instantly BLOCKED.")
+    test_results.append(("Scenario 5: Revoked Agent Attempt", "PASS" if s5_pass else "FAIL", 
+                         f"Verdict: {res_revoked['decision']} | Reason: {res_revoked['reason']}"))
+    print(f"  -> Verdict: {res_revoked['decision']} (Status: {res_revoked['status']})")
+    print(f"  -> Reason: {res_revoked['reason']}")
+    print(f"  -> Result: {'PASS' if s5_pass else 'FAIL'}")
 
-    # 9. Test Customer Confirmation State Updates (Educational Simulation)
-    print("\n[Test 9] Testing Human-in-the-Loop Customer Approval...")
-    pending_before = get_pending_requests()
-    assert any(p["request_id"] == req_to_approve for p in pending_before)
+    # -------------------------------------------------------------------------
+    # Scenario 6: Custom Scenario — Mandatory Refund Request & Customer Approval
+    # -------------------------------------------------------------------------
+    print("\n[Scenario 6] Testing Custom Scenario: Mandatory Refund Request & Customer Sign-Off...")
+    # Step A: Inbound refund request must return ASK CUSTOMER
+    res_refund = engine.evaluate_request(
+        agent_id="AGT-MMT-001",
+        action=ACTION_REQUEST_REFUND,
+        customer_id="CUST-6E-777",
+        pnr="6E-REF88",
+        flight_details="Cancel 6E-501 DEL->BLR and process ₹7,200.00 refund",
+        amount=7200.0
+    )
+    refund_req_id = res_refund["request_id"]
+    is_asked = (res_refund["decision"] == DECISION_ASK_CUSTOMER and 
+                res_refund["status"] == STATUS_PENDING_CUSTOMER)
 
-    # Approve request
-    update_request_decision_by_customer(req_to_approve, "APPROVE", customer_notes="Verified via SMS OTP simulation")
-    
-    # Check updated request
+    # Step B: Customer confirms via portal; simulated status updates to APPROVED
+    update_request_decision_by_customer(refund_req_id, "APPROVE", customer_notes="Customer confirmed cancellation via OTP simulation")
     all_reqs = get_all_requests()
-    matched = next((r for r in all_reqs if r["request_id"] == req_to_approve), None)
-    assert matched is not None
-    assert matched["status"] == STATUS_APPROVED
-    print(f"✅ Customer confirmation passed: Request {req_to_approve} status updated to {matched['status']}")
+    matched = next((r for r in all_reqs if r["request_id"] == refund_req_id), None)
+    is_approved = matched is not None and matched["status"] == STATUS_APPROVED
 
-    # 10. Verify Permanent Audit Log Entries
-    print("\n[Test 10] Verifying Permanent Audit Log integrity...")
-    audit_entries = get_all_audit_logs()
-    assert len(audit_entries) >= 10, f"Expected at least 10 audit entries, found {len(audit_entries)}"
-    print(f"✅ Permanent Audit Log contains {len(audit_entries)} immutable entries.")
+    s6_pass = is_asked and is_approved
+    test_results.append(("Scenario 6: Custom — Mandatory Refund & Customer Sign-Off", "PASS" if s6_pass else "FAIL", 
+                         f"Initial: {res_refund['decision']} ({res_refund['status']}) -> After Customer Approval: {matched['status'] if matched else 'N/A'}"))
+    print(f"  -> Initial Gatekeeper Verdict: {res_refund['decision']} (Status: {res_refund['status']})")
+    print(f"  -> Post-Approval Status: {matched['status'] if matched else 'N/A'}")
+    print(f"  -> Result: {'PASS' if s6_pass else 'FAIL'}")
 
-    print("\n" + "=" * 65)
-    print("🎉 ALL 10 VERIFICATION TESTS PASSED SUCCESSFULLY!")
-    print("=" * 65)
+    # -------------------------------------------------------------------------
+    # Summary Report
+    # -------------------------------------------------------------------------
+    print("\n" + "=" * 70)
+    print("📊 SUMMARY TEST REPORT — ALL SIX SCENARIOS")
+    print("=" * 70)
+    all_passed = True
+    for name, result, details in test_results:
+        symbol = "✅" if result == "PASS" else "❌"
+        print(f"{symbol} [{result}] {name}")
+        print(f"    Details: {details}")
+        if result != "PASS":
+            all_passed = False
+
+    print("=" * 70)
+    if all_passed:
+        print("🎉 ALL SIX REQUIRED TEST SCENARIOS PASSED SUCCESSFULLY!")
+    else:
+        print("⚠️ SOME TESTS FAILED. PLEASE REVIEW LOGS ABOVE.")
+    print("=" * 70)
+
+    return all_passed
 
 if __name__ == "__main__":
-    run_all_tests()
+    success = run_tests()
+    sys.exit(0 if success else 1)
