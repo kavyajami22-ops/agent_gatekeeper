@@ -15,7 +15,7 @@ As consumer commerce rapidly evolves from human-driven web interfaces to autonom
 
 Traditional security systems rely on CAPTCHAs and session cookies designed for human browsers, which fail to manage machine-to-machine agentic commerce. Airlines require an intelligent, zero-trust policy interceptor—an **Agent Gatekeeper**—to evaluate incoming AI agent requests before they reach core reservation infrastructure.
 
-> **Educational Simulation Notice:** This project is an educational simulation developed strictly for academic purposes. It operates in a safe, sandboxed environment. No live airline reservation systems (PSS/GDS), airline inventory feeds, or real payment gateways are connected or transacted.
+> **Educational Simulation Notice:** This project is an educational simulation developed strictly for academic purposes. It operates in a safe, sandboxed environment. No real airline reservation systems (PSS/GDS), airline inventory feeds, or real payment gateways are connected or transacted.
 
 ---
 
@@ -49,25 +49,11 @@ The Gatekeeper functions as an intermediary policy layer positioned between exte
 
 To ensure operational reliability and simplicity for academic grading, the system was built using a clean, zero-external-dependency core architecture:
 
-* **Programming Language:** Python 3.11.
+* **Programming Language:** Python 3.11 with clean modular separation (`core/config.py`, `core/database.py`, `core/gatekeeper.py`, `core/seed_data.py`).
 * **Persistent Database Layer:** SQLite (`sqlite3` standard library), providing ACID-compliant relational storage across three tables: `agents`, `requests`, and `audit_log`.
 * **Zero-Dependency Web Server:** Built-in Python `http.server` ([server.py](file:///c%3A/Users/kavya/OneDrive/Desktop/agent_gatekeeper/server.py)) serving a responsive HTML5/CSS/JavaScript dashboard at `http://localhost:8501`. Enables immediate execution on any machine with only base Python installed.
 * **Streamlit Framework:** Optional modern interactive dashboard ([app.py](file:///c%3A/Users/kavya/OneDrive/Desktop/agent_gatekeeper/app.py)) with Plotly visual analytics for environments with installed dependencies.
 * **One-Click Windows Launcher:** Provided via [run.bat](file:///c%3A/Users/kavya/OneDrive/Desktop/agent_gatekeeper/run.bat).
-
-```
-agent_gatekeeper/
-├── server.py              # Zero-dependency Python web application
-├── app.py                 # Streamlit interactive application
-├── run.bat                # Windows one-click execution script
-├── test_gatekeeper.py     # Automated 10-test verification suite
-├── core/
-│   ├── config.py          # Enrolment ID (PGD202564221), ₹8,000 threshold & constants
-│   ├── database.py        # SQLite schema, persistent storage, and timestamping
-│   ├── gatekeeper.py      # Tri-state policy decision engine
-│   └── seed_data.py       # Pre-seeded commercial agents, routes, and sample requests
-└── data/gatekeeper.db     # Persistent SQLite database
-```
 
 ---
 
@@ -82,20 +68,16 @@ agent_gatekeeper/
 
 ### 6. Empirical Testing & Validation Results
 
-The application's policy engine was tested and validated using an automated test suite ([test_gatekeeper.py](file:///c%3A/Users/kavya/OneDrive/Desktop/agent_gatekeeper/test_gatekeeper.py)). All 10 rigorous test scenarios passed successfully:
+The application's policy engine and business logic were rigorously verified using the automated test suite ([test_gatekeeper.py](file:///c%3A/Users/kavya/OneDrive/Desktop/agent_gatekeeper/test_gatekeeper.py)). All six required Gatekeeper test scenarios passed completely:
 
-| Test ID | Scenario Description | Input Parameters | Expected Verdict | Actual Test Result |
-| :---: | :--- | :--- | :---: | :---: |
-| **T-01** | Database schema initialization | SQLite schema & seed data | 5 Agents Seeded | **Passed** (5 agents loaded) |
-| **T-02** | Action 1: View flight fares | Agent `AGT-MMT-001`, Fare Query | `ALLOW` | **Passed** (`ALLOW`, `EXECUTED`) |
-| **T-03** | Action 2: Booking $\le$ ₹8,000 limit | Agent `AGT-MMT-001`, ₹4,800 fare | `ALLOW` | **Passed** (`ALLOW`, `EXECUTED`) |
-| **T-04** | Action 2: Booking $>$ ₹8,000 limit | Agent `AGT-MMT-001`, ₹9,500 fare | `ASK CUSTOMER` | **Passed** (`ASK CUSTOMER`, `PENDING`) |
-| **T-05** | Action 3: Flight change request | Agent `AGT-MMT-001`, ₹1,200 change fee | `ASK CUSTOMER` | **Passed** (`ASK CUSTOMER`, `PENDING`) |
-| **T-06** | Action 4: Refund request | Agent `AGT-MMT-001`, ₹4,800 refund | `ASK CUSTOMER` | **Passed** (`ASK CUSTOMER`, `PENDING`) |
-| **T-07** | Revoked agent enforcement | Revoked Agent `AGT-ROG-005`, Fare Query | `BLOCK` | **Passed** (`BLOCK`, Access Denied) |
-| **T-08** | Dynamic Kill-Switch & Timestamps | Revoke `AGT-EXP-002` dynamically | Timestamp Logged & `BLOCK` | **Passed** (Revoked timestamp saved) |
-| **T-09** | Human-in-the-Loop approval | Approve pending request `REQ-6E-...` | Status $\rightarrow$ `APPROVED` | **Passed** (Simulated state updated) |
-| **T-10** | Permanent Audit Log integrity | Query all rows in `audit_log` | Immutable Ledger | **Passed** (All events recorded) |
+| Scenario Name | Expected Decision | Actual Decision | Final Status |
+| :--- | :--- | :--- | :---: |
+| **1. Registered Agent with Read-Only Permission** | `ALLOW` (Fare query) / `BLOCK` (Booking attempt) | `ALLOW` (Fare query) / `BLOCK` (Booking attempt) | **PASS** |
+| **2. Unknown or Unregistered Agent** | `BLOCK` | `BLOCK` | **PASS** |
+| **3. Booking Amount Above ₹8,000 Threshold** | `ASK CUSTOMER` | `ASK CUSTOMER` | **PASS** |
+| **4. Booking Amount At or Below ₹8,000 Threshold** | `ALLOW` | `ALLOW` | **PASS** |
+| **5. Revoked Agent Attempting Any Request** | `BLOCK` | `BLOCK` | **PASS** |
+| **6. Custom Scenario: Mandatory Refund & Customer Sign-Off** | `ASK CUSTOMER → PENDING_CUSTOMER → APPROVED after customer approval` | `ASK CUSTOMER → PENDING_CUSTOMER → APPROVED after customer approval` | **PASS** |
 
 ---
 
