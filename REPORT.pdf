@@ -63,7 +63,7 @@ Q
 endstream
 endobj
 6 0 obj
-<< /Length 8112 >>
+<< /Length 5980 >>
 stream
 q
 BT /F2 8.5 Tf 0.0 0.106 0.58 rg 36 808 Td (IndiGo Airlines - Agent Gatekeeper \(6E Guard\) | Technical & Empirical Report) Tj ET
@@ -89,85 +89,51 @@ Q
 q
 0.0 0.106 0.58 rg 36 694 523.28 1.5 re f
 BT /F2 10.5 Tf 0.0 0.106 0.58 rg 36 699 Td (6. Empirical Testing & Validation Results \(Automated Test Suite: test_gatekeeper.py\)) Tj ET
-0.0 0.106 0.58 rg 36 677 523.28 13.5 re f
-BT /F2 7 Tf 1 1 1 rg 40 681 Td (Test ID) Tj 78 681 Td (Scenario Description) Tj 225 681 Td (Input Parameters) Tj 355 681 Td (Expected Verdict) Tj 455 681 Td (Actual Test Result) Tj ET
-0.96 0.97 0.99 rg 36 663.5 523.28 13.5 re f
-0.88 0.9 0.92 RG 0.4 w 36 663.5 523.28 13.5 re S
-BT /F2 6.5 Tf 0.1 0.15 0.2 rg 40 667.5 Td (T-01) Tj ET
-BT /F1 6.5 Tf 0.2 0.2 0.2 rg 78 667.5 Td (Database schema initialization) Tj ET
-BT /F1 6.5 Tf 0.3 0.3 0.3 rg 225 667.5 Td (SQLite schema & seed data) Tj ET
-BT /F2 6.5 Tf 0.0 0.106 0.58 rg 355 667.5 Td (5 Seeded Agents) Tj ET
-BT /F2 6.5 Tf 0.06 0.6 0.3 rg 455 667.5 Td (Passed (5 loaded)) Tj ET
-1.0 1.0 1.0 rg 36 650 523.28 13.5 re f
-0.88 0.9 0.92 RG 0.4 w 36 650 523.28 13.5 re S
-BT /F2 6.5 Tf 0.1 0.15 0.2 rg 40 654 Td (T-02) Tj ET
-BT /F1 6.5 Tf 0.2 0.2 0.2 rg 78 654 Td (Action 1: View flight fares) Tj ET
-BT /F1 6.5 Tf 0.3 0.3 0.3 rg 225 654 Td (AGT-MMT-001, Fare Query) Tj ET
-BT /F2 6.5 Tf 0.0 0.106 0.58 rg 355 654 Td (ALLOW) Tj ET
-BT /F2 6.5 Tf 0.06 0.6 0.3 rg 455 654 Td (Passed (EXECUTED)) Tj ET
-0.96 0.97 0.99 rg 36 636.5 523.28 13.5 re f
-0.88 0.9 0.92 RG 0.4 w 36 636.5 523.28 13.5 re S
-BT /F2 6.5 Tf 0.1 0.15 0.2 rg 40 640.5 Td (T-03) Tj ET
-BT /F1 6.5 Tf 0.2 0.2 0.2 rg 78 640.5 Td (Action 2: Booking <= Rs. 8,000) Tj ET
-BT /F1 6.5 Tf 0.3 0.3 0.3 rg 225 640.5 Td (AGT-MMT-001, Rs. 4,800 fare) Tj ET
-BT /F2 6.5 Tf 0.0 0.106 0.58 rg 355 640.5 Td (ALLOW) Tj ET
-BT /F2 6.5 Tf 0.06 0.6 0.3 rg 455 640.5 Td (Passed (EXECUTED)) Tj ET
-1.0 1.0 1.0 rg 36 623 523.28 13.5 re f
-0.88 0.9 0.92 RG 0.4 w 36 623 523.28 13.5 re S
-BT /F2 6.5 Tf 0.1 0.15 0.2 rg 40 627 Td (T-04) Tj ET
-BT /F1 6.5 Tf 0.2 0.2 0.2 rg 78 627 Td (Action 2: Booking > Rs. 8,000) Tj ET
-BT /F1 6.5 Tf 0.3 0.3 0.3 rg 225 627 Td (AGT-MMT-001, Rs. 9,500 fare) Tj ET
-BT /F2 6.5 Tf 0.0 0.106 0.58 rg 355 627 Td (ASK CUSTOMER) Tj ET
-BT /F2 6.5 Tf 0.06 0.6 0.3 rg 455 627 Td (Passed (PENDING)) Tj ET
-0.96 0.97 0.99 rg 36 609.5 523.28 13.5 re f
-0.88 0.9 0.92 RG 0.4 w 36 609.5 523.28 13.5 re S
-BT /F2 6.5 Tf 0.1 0.15 0.2 rg 40 613.5 Td (T-05) Tj ET
-BT /F1 6.5 Tf 0.2 0.2 0.2 rg 78 613.5 Td (Action 3: Flight change request) Tj ET
-BT /F1 6.5 Tf 0.3 0.3 0.3 rg 225 613.5 Td (AGT-MMT-001, Rs. 1,200 fee) Tj ET
-BT /F2 6.5 Tf 0.0 0.106 0.58 rg 355 613.5 Td (ASK CUSTOMER) Tj ET
-BT /F2 6.5 Tf 0.06 0.6 0.3 rg 455 613.5 Td (Passed (PENDING)) Tj ET
-1.0 1.0 1.0 rg 36 596 523.28 13.5 re f
-0.88 0.9 0.92 RG 0.4 w 36 596 523.28 13.5 re S
-BT /F2 6.5 Tf 0.1 0.15 0.2 rg 40 600 Td (T-06) Tj ET
-BT /F1 6.5 Tf 0.2 0.2 0.2 rg 78 600 Td (Action 4: Refund request) Tj ET
-BT /F1 6.5 Tf 0.3 0.3 0.3 rg 225 600 Td (AGT-MMT-001, Rs. 4,800 refund) Tj ET
-BT /F2 6.5 Tf 0.0 0.106 0.58 rg 355 600 Td (ASK CUSTOMER) Tj ET
-BT /F2 6.5 Tf 0.06 0.6 0.3 rg 455 600 Td (Passed (PENDING)) Tj ET
-0.96 0.97 0.99 rg 36 582.5 523.28 13.5 re f
-0.88 0.9 0.92 RG 0.4 w 36 582.5 523.28 13.5 re S
-BT /F2 6.5 Tf 0.1 0.15 0.2 rg 40 586.5 Td (T-07) Tj ET
-BT /F1 6.5 Tf 0.2 0.2 0.2 rg 78 586.5 Td (Revoked agent lockdown) Tj ET
-BT /F1 6.5 Tf 0.3 0.3 0.3 rg 225 586.5 Td (AGT-ROG-005, Fare Query) Tj ET
-BT /F2 6.5 Tf 0.0 0.106 0.58 rg 355 586.5 Td (BLOCK) Tj ET
-BT /F2 6.5 Tf 0.06 0.6 0.3 rg 455 586.5 Td (Passed (Access Denied)) Tj ET
-1.0 1.0 1.0 rg 36 569 523.28 13.5 re f
-0.88 0.9 0.92 RG 0.4 w 36 569 523.28 13.5 re S
-BT /F2 6.5 Tf 0.1 0.15 0.2 rg 40 573 Td (T-08) Tj ET
-BT /F1 6.5 Tf 0.2 0.2 0.2 rg 78 573 Td (Dynamic Kill-Switch & Timestamps) Tj ET
-BT /F1 6.5 Tf 0.3 0.3 0.3 rg 225 573 Td (Revoke AGT-EXP-002) Tj ET
-BT /F2 6.5 Tf 0.0 0.106 0.58 rg 355 573 Td (Timestamp & BLOCK) Tj ET
-BT /F2 6.5 Tf 0.06 0.6 0.3 rg 455 573 Td (Passed (Timestamp logged)) Tj ET
-0.96 0.97 0.99 rg 36 555.5 523.28 13.5 re f
-0.88 0.9 0.92 RG 0.4 w 36 555.5 523.28 13.5 re S
-BT /F2 6.5 Tf 0.1 0.15 0.2 rg 40 559.5 Td (T-09) Tj ET
-BT /F1 6.5 Tf 0.2 0.2 0.2 rg 78 559.5 Td (Human-in-the-Loop approval) Tj ET
-BT /F1 6.5 Tf 0.3 0.3 0.3 rg 225 559.5 Td (Approve pending REQ-6E) Tj ET
-BT /F2 6.5 Tf 0.0 0.106 0.58 rg 355 559.5 Td (Status -> APPROVED) Tj ET
-BT /F2 6.5 Tf 0.06 0.6 0.3 rg 455 559.5 Td (Passed (State updated)) Tj ET
-1.0 1.0 1.0 rg 36 542 523.28 13.5 re f
-0.88 0.9 0.92 RG 0.4 w 36 542 523.28 13.5 re S
-BT /F2 6.5 Tf 0.1 0.15 0.2 rg 40 546 Td (T-10) Tj ET
-BT /F1 6.5 Tf 0.2 0.2 0.2 rg 78 546 Td (Permanent Audit Log integrity) Tj ET
-BT /F1 6.5 Tf 0.3 0.3 0.3 rg 225 546 Td (Query all audit_log rows) Tj ET
-BT /F2 6.5 Tf 0.0 0.106 0.58 rg 355 546 Td (Immutable Ledger) Tj ET
-BT /F2 6.5 Tf 0.06 0.6 0.3 rg 455 546 Td (Passed (All events logged)) Tj ET
+0.0 0.106 0.58 rg 36 676 523.28 16.5 re f
+BT /F2 7.5 Tf 1 1 1 rg 42 681 Td (Scenario Name) Tj 205 681 Td (Expected Decision) Tj 355 681 Td (Actual Decision) Tj 480 681 Td (Final Status) Tj ET
+0.96 0.97 0.99 rg 36 659.5 523.28 16.5 re f
+0.88 0.9 0.92 RG 0.4 w 36 659.5 523.28 16.5 re S
+BT /F2 6.5 Tf 0.1 0.15 0.2 rg 42 664.5 Td (1. Registered Agent with Read-Only Permission) Tj ET
+BT /F1 6.5 Tf 0.2 0.2 0.2 rg 205 664.5 Td (ALLOW (Fare) / BLOCK (Booking)) Tj ET
+BT /F1 6.5 Tf 0.0 0.106 0.58 rg 355 664.5 Td (ALLOW (Fare) / BLOCK (Booking)) Tj ET
+BT /F2 7 Tf 0.06 0.6 0.3 rg 485 664.5 Td (PASS) Tj ET
+1.0 1.0 1.0 rg 36 643 523.28 16.5 re f
+0.88 0.9 0.92 RG 0.4 w 36 643 523.28 16.5 re S
+BT /F2 6.5 Tf 0.1 0.15 0.2 rg 42 648 Td (2. Unknown or Unregistered Agent) Tj ET
+BT /F1 6.5 Tf 0.2 0.2 0.2 rg 205 648 Td (BLOCK) Tj ET
+BT /F1 6.5 Tf 0.0 0.106 0.58 rg 355 648 Td (BLOCK) Tj ET
+BT /F2 7 Tf 0.06 0.6 0.3 rg 485 648 Td (PASS) Tj ET
+0.96 0.97 0.99 rg 36 626.5 523.28 16.5 re f
+0.88 0.9 0.92 RG 0.4 w 36 626.5 523.28 16.5 re S
+BT /F2 6.5 Tf 0.1 0.15 0.2 rg 42 631.5 Td (3. Booking Amount Above Rs. 8,000 Threshold) Tj ET
+BT /F1 6.5 Tf 0.2 0.2 0.2 rg 205 631.5 Td (ASK CUSTOMER) Tj ET
+BT /F1 6.5 Tf 0.0 0.106 0.58 rg 355 631.5 Td (ASK CUSTOMER) Tj ET
+BT /F2 7 Tf 0.06 0.6 0.3 rg 485 631.5 Td (PASS) Tj ET
+1.0 1.0 1.0 rg 36 610 523.28 16.5 re f
+0.88 0.9 0.92 RG 0.4 w 36 610 523.28 16.5 re S
+BT /F2 6.5 Tf 0.1 0.15 0.2 rg 42 615 Td (4. Booking Amount At or Below Rs. 8,000) Tj ET
+BT /F1 6.5 Tf 0.2 0.2 0.2 rg 205 615 Td (ALLOW) Tj ET
+BT /F1 6.5 Tf 0.0 0.106 0.58 rg 355 615 Td (ALLOW) Tj ET
+BT /F2 7 Tf 0.06 0.6 0.3 rg 485 615 Td (PASS) Tj ET
+0.96 0.97 0.99 rg 36 593.5 523.28 16.5 re f
+0.88 0.9 0.92 RG 0.4 w 36 593.5 523.28 16.5 re S
+BT /F2 6.5 Tf 0.1 0.15 0.2 rg 42 598.5 Td (5. Revoked Agent Attempting Any Request) Tj ET
+BT /F1 6.5 Tf 0.2 0.2 0.2 rg 205 598.5 Td (BLOCK) Tj ET
+BT /F1 6.5 Tf 0.0 0.106 0.58 rg 355 598.5 Td (BLOCK) Tj ET
+BT /F2 7 Tf 0.06 0.6 0.3 rg 485 598.5 Td (PASS) Tj ET
+1.0 1.0 1.0 rg 36 577 523.28 16.5 re f
+0.88 0.9 0.92 RG 0.4 w 36 577 523.28 16.5 re S
+BT /F2 6.5 Tf 0.1 0.15 0.2 rg 42 582 Td (6. Custom: Mandatory Refund & Customer Sign-Off) Tj ET
+BT /F1 6.5 Tf 0.2 0.2 0.2 rg 205 582 Td (ASK CUSTOMER -> PENDING -> APPROVED) Tj ET
+BT /F1 6.5 Tf 0.0 0.106 0.58 rg 355 582 Td (ASK CUSTOMER -> PENDING -> APPROVED) Tj ET
+BT /F2 7 Tf 0.06 0.6 0.3 rg 485 582 Td (PASS) Tj ET
 Q
 q
-0.0 0.106 0.58 rg 36 520.5 523.28 1.5 re f
-BT /F2 10.5 Tf 0.0 0.106 0.58 rg 36 525.5 Td (7. Strategic MBA Takeaways & Conclusion) Tj ET
-BT /F2 7.5 Tf 0.0 0.106 0.58 rg 46 508.5 Td (\(o\) Risk-Calibrated Automation:) Tj /F1 7.5 Tf 0.2 0.2 0.2 rg ( Full automation introduces dispute liability; zero automation eliminates AI utility. Rs. 8,000 balances both.) Tj ET
-BT /F2 7.5 Tf 0.0 0.106 0.58 rg 46 498.5 Td (\(o\) Zero-Trust Architecture:) Tj /F1 7.5 Tf 0.2 0.2 0.2 rg ( Airlines cannot grant open API access to external agents. Every transaction must be validated against real-time status.) Tj ET
-BT /F2 7.5 Tf 0.0 0.106 0.58 rg 46 488.5 Td (\(o\) Non-Repudiation & Auditability:) Tj /F1 7.5 Tf 0.2 0.2 0.2 rg ( Permanent SQLite audit trails record AI intent vs. human authorization, ensuring legal defensibility under DPDP.) Tj ET
+0.0 0.106 0.58 rg 36 548.5 523.28 1.5 re f
+BT /F2 10.5 Tf 0.0 0.106 0.58 rg 36 553.5 Td (7. Strategic MBA Takeaways & Conclusion) Tj ET
+BT /F2 7.5 Tf 0.0 0.106 0.58 rg 46 536.5 Td (\(o\) Risk-Calibrated Automation:) Tj /F1 7.5 Tf 0.2 0.2 0.2 rg ( Full automation introduces dispute liability; zero automation eliminates AI utility. Rs. 8,000 balances both.) Tj ET
+BT /F2 7.5 Tf 0.0 0.106 0.58 rg 46 526.5 Td (\(o\) Zero-Trust Architecture:) Tj /F1 7.5 Tf 0.2 0.2 0.2 rg ( Airlines cannot grant open API access to external agents. Every transaction must be validated against real-time status.) Tj ET
+BT /F2 7.5 Tf 0.0 0.106 0.58 rg 46 516.5 Td (\(o\) Non-Repudiation & Auditability:) Tj /F1 7.5 Tf 0.2 0.2 0.2 rg ( Permanent SQLite audit trails record AI intent vs. human authorization, ensuring legal defensibility under DPDP.) Tj ET
 Q
 q
 0.8 0.82 0.85 RG 0.5 w 36 38 523.28 0 re S
@@ -197,12 +163,12 @@ xref
 0000000245 00000 n 
 0000000355 00000 n 
 0000005216 00000 n 
-0000013380 00000 n 
-0000013474 00000 n 
-0000013571 00000 n 
-0000013673 00000 n 
+0000011248 00000 n 
+0000011342 00000 n 
+0000011439 00000 n 
+0000011541 00000 n 
 trailer
 << /Size 11 /Root 1 0 R >>
 startxref
-13779
+11647
 %%EOF
